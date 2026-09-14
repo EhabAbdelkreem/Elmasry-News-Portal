@@ -8,17 +8,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database Context (SQL Server)
+// Database Context (SQL Server by default, with InMemory fallback if package or connection is set)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    if (!string.IsNullOrEmpty(connectionString))
+    if (!string.IsNullOrWhiteSpace(connectionString) && !connectionString.Contains("YOUR_HOST"))
     {
         options.UseSqlServer(connectionString);
     }
     else
     {
-        options.UseInMemoryDatabase("AlmasryNewsInMemory");
+        // Requires Microsoft.EntityFrameworkCore.InMemory package
+        options.UseInMemoryDatabase("AlmasryNewsDb");
     }
 });
 
