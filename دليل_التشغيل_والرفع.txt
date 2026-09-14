@@ -1,0 +1,67 @@
+================================================================
+بوابة المصري الإخباري - مشروع Full-Stack متكامل (Angular + .NET Core + SQL Server)
+================================================================
+
+أهلاً بك باشمهندس إيهاب!
+تم إعداد وضبط المشروع بالكامل ليحتوي على:
+1. الواجهة الأمامية (Frontend)  -> Angular 18 مع Tailwind CSS في مجلد src
+2. الباك إند (.NET Core 8 Web API) -> مشروع C# و EF Core كامل في مجلد backend
+3. قاعدة البيانات (SQL Server)    -> سكربت SQL كامل مع الجداول والبيانات Database_Setup.sql
+4. خادم Node.js / Express بديل    -> مجلد server مع قاعدة بيانات JSON للتجربة السريعة
+
+----------------------------------------------------------------
+📁 هيكلية الملفات في هذا التحميل / المشروع:
+----------------------------------------------------------------
+- /backend/                  <- مشروع ASP.NET Core 8 Web API كامل (C#)
+  - AlmasryNews.Api.csproj  <- ملف المشروع
+  - Program.cs              <- إعدادات التشغيل، الـ CORS، والـ Swagger
+  - Controllers/            <- واجهات REST API (Articles, Categories, Auth)
+  - Data/AppDbContext.cs    <- سياق Entity Framework Core
+  - Models/Entities.cs      <- نماذج الجداول (Articles, Users, Categories)
+  - appsettings.json        <- إعدادات الاتصال بالسيرفر و SQL Server
+- /Database_Setup.sql        <- سكربت SQL Server الكامل لإنشاء الجداول والبيانات
+- /src/                      <- كود الواجهة الأمامية بالكامل (Angular 18)
+- /server/                   <- خادم Express كبديل خفيف وسريع للباك إند
+- /تشغيل_الموقع.bat          <- تشغيل فوري بنقرة واحدة على ويندوز
+
+----------------------------------------------------------------
+🚀 كيفية تشغيل المشروع على جهازك:
+----------------------------------------------------------------
+1. لتشغيل الواجهة الأمامية (Angular):
+   npm install
+   npm start
+   (يفتح الموقع على http://localhost:4200)
+
+2. لتشغيل الباك إند ASP.NET Core:
+   cd backend
+   dotnet run
+   (يفتح السيرفر مع Swagger على http://localhost:5000/swagger)
+
+3. لإعداد قاعدة بيانات SQL Server:
+   افتح ملف Database_Setup.sql في SQL Server Management Studio (SSMS) ونفذ Run (Execute).
+
+----------------------------------------------------------------
+📦 خطوات الرفع إلى GitHub (لرفع الفرونت والباك والداتابيز معاً):
+----------------------------------------------------------------
+افتح مجلد المشروع في الـ Terminal أو Git Bash ونفذ:
+
+git init
+git add .
+git commit -m "Complete Fullstack Al-Masry News (Angular 18 + .NET Core 8 + SQL Server)"
+git branch -M main
+git remote add origin https://github.com/USERNAME/REPO_NAME.git
+git push -u origin main
+
+كل المجلدات (src + backend + Database_Setup.sql) ستُرفع كاملة إلى GitHub دفعة واحدة!
+
+----------------------------------------------------------------
+🔑 بيانات الدخول للوحة التحكم:
+----------------------------------------------------------------
+- م. إيهاب عبد الكريم (Superadmin):
+  البريد: ehababdelkreem012@yahoo.com
+  كلمة المرور: 01282407472ehab
+
+- أ. مجدي محمد أبو زيد (Editor):
+  البريد: magdy@almasry-news.eg
+  كلمة المرور: magdy
+================================================================

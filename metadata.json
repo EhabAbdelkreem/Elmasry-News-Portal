@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix المنصة الإخبارية العربية",
+  "description": "منصة إخبارية عربية شاملة ومتكاملة بمستوى المواقع العالمية: أخبار عاجلة، تقارير وتحقيقات، تغطية حية، أقسام متخصصة، محافظات مصر، خدمات حية، ولوحة تحكم CMS كاملة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

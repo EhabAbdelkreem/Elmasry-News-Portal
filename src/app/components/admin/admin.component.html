@@ -1,0 +1,1195 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans" dir="rtl">
+
+  <!-- Toast Notification -->
+  <div *ngIf="toastMessage" 
+       class="fixed bottom-6 left-6 z-50 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold animate-bounce text-white"
+       [ngClass]="{
+         'bg-emerald-600': toastType === 'success',
+         'bg-blue-600': toastType === 'info',
+         'bg-red-600': toastType === 'error'
+       }">
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Admin Bar & Profile Header -->
+  <div class="bg-stone-900 text-white p-6 sm:p-8 rounded-3xl mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-xl border border-stone-800 text-right">
+    <div class="flex items-start gap-4">
+      <img [src]="authService.currentUser()?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80'" 
+           alt="Avatar" 
+           class="w-16 h-16 rounded-2xl object-cover ring-2 ring-red-500/40 shadow-md">
+      <div>
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <span class="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-xs">
+            لوحة التحرير والتحكم المركزية
+          </span>
+          <span class="bg-stone-800 text-stone-300 text-xs px-2.5 py-0.5 rounded-full border border-stone-700">
+            {{ authService.currentUser()?.roleTitle || 'المدير العام ورئيس التحرير' }}
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white">
+          {{ authService.currentUser()?.name || 'المهندس إيهاب عبد الكريم' }}
+        </h1>
+        <p class="text-xs text-stone-400 mt-1">
+          التحكم الكامل في المحتوى الصحفي، إدارة طاقم التحرير، تدقيق الشائعات (المصري فاكت)، وهوية الموقع.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <button (click)="openNewArticleTab()" 
+              class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-lg transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>+ إضافة خبر جديد</span>
+      </button>
+
+      <a routerLink="/" 
+         class="bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold px-4 py-3 rounded-2xl border border-stone-700 transition-colors flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>العودة للموقع</span>
+      </a>
+
+      <button (click)="authService.logout(); router.navigate(['/login'])" 
+              class="bg-stone-800/80 hover:bg-red-950/60 hover:text-red-400 text-stone-400 text-xs px-3.5 py-3 rounded-2xl border border-stone-800 transition-colors cursor-pointer">
+        خروج
+      </button>
+    </div>
+  </div>
+
+  <!-- 4 Core Quick Metrics -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-right">
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <span class="text-xs text-stone-500 font-medium block">المقالات المنشورة</span>
+        <strong class="text-2xl sm:text-3xl font-black text-stone-900 font-mono mt-1 block">{{ articles.length }}</strong>
+      </div>
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <span class="text-xs text-stone-500 font-medium block">إجمالي القراءات الحية</span>
+        <strong class="text-2xl sm:text-3xl font-black text-emerald-600 font-mono mt-1 block">{{ analyticsData?.totalViews || 458900 | number }}</strong>
+      </div>
+      <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <span class="text-xs text-stone-500 font-medium block">فريق التحرير والصحفيين</span>
+        <strong class="text-2xl sm:text-3xl font-black text-purple-600 font-mono mt-1 block">{{ users.length }}</strong>
+      </div>
+      <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <span class="text-xs text-stone-500 font-medium block">أخبار الشريط العاجل</span>
+        <strong class="text-2xl sm:text-3xl font-black text-red-600 font-mono mt-1 block">{{ breakingItems.length }}</strong>
+      </div>
+      <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB NAVIGATION BAR -->
+  <div class="bg-white p-2 rounded-2xl border border-stone-200 shadow-xs mb-8 overflow-x-auto">
+    <div class="flex items-center gap-1.5 min-w-max text-xs font-bold">
+      <button (click)="activeTab = 'articles'" 
+              [ngClass]="activeTab === 'articles' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:bg-stone-100'"
+              class="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        <span>الأخبار والمقالات</span>
+        <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono">{{ articles.length }}</span>
+      </button>
+
+      <button (click)="openNewArticleTab()" 
+              [ngClass]="activeTab === 'newArticle' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:bg-stone-100'"
+              class="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span>{{ editingArticleId ? 'تعديل المقال' : 'إضافة خبر جديد' }}</span>
+      </button>
+
+      <button (click)="activeTab = 'users'" 
+              [ngClass]="activeTab === 'users' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:bg-stone-100'"
+              class="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <span>المحررين وفريق العمل</span>
+        <span class="bg-stone-200 text-stone-700 text-[10px] px-1.5 py-0.2 rounded-full font-mono">{{ users.length }}</span>
+      </button>
+
+      <button (click)="activeTab = 'theme'" 
+              [ngClass]="activeTab === 'theme' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:bg-stone-100'"
+              class="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+        <span>هوية وألوان النظام</span>
+      </button>
+
+      <button (click)="activeTab = 'display'" 
+              [ngClass]="activeTab === 'display' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:bg-stone-100'"
+              class="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+        <span>إعدادات العرض والرئيسية</span>
+      </button>
+
+      <button (click)="activeTab = 'analytics'" 
+              [ngClass]="activeTab === 'analytics' ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:bg-stone-100'"
+              class="px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <span>الإحصائيات والتحليلات</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 1: ARTICLES MANAGEMENT -->
+  <!-- ===================================================================== -->
+  <div *ngIf="activeTab === 'articles'">
+    <!-- Search & Filter Bar -->
+    <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex-1 relative">
+        <input [(ngModel)]="articleSearch" 
+               type="text" 
+               placeholder="ابحث في الأخبار بالعنوان، المحتوى أو الوسوم..." 
+               class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-right pr-10 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600">
+        <svg class="w-4 h-4 text-stone-400 absolute right-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <select [(ngModel)]="selectedCategoryFilter" 
+                class="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-700 focus:outline-none focus:border-red-600">
+          <option value="all">كافة الأقسام والتصنيفات</option>
+          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+        </select>
+
+        <select [(ngModel)]="selectedStatusFilter" 
+                class="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-700 focus:outline-none focus:border-red-600">
+          <option value="all">كل الحالات</option>
+          <option value="published">منشور فقط</option>
+          <option value="draft">مسودات</option>
+          <option value="breaking">أخبار عاجلة</option>
+          <option value="featured">مميز بالرئيسية</option>
+          <option value="factcheck">تدقيق شائعات (المصري فاكت)</option>
+        </select>
+
+        <!-- View Mode Switcher: Rows / Table -->
+        <div class="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 shrink-0">
+          <button (click)="articlesViewMode = 'rows'" 
+                  [ngClass]="articlesViewMode === 'rows' ? 'bg-white text-stone-900 shadow-xs font-bold' : 'text-stone-500 hover:text-stone-800'"
+                  class="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="عرض أسطر تحت بعضها">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span>أسطر</span>
+          </button>
+          <button (click)="articlesViewMode = 'table'" 
+                  [ngClass]="articlesViewMode === 'table' ? 'bg-white text-stone-900 shadow-xs font-bold' : 'text-stone-500 hover:text-stone-800'"
+                  class="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="عرض جدول تفصيلي">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>جدول</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Breaking News Inserter -->
+    <div class="bg-red-50/70 border border-red-200 rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center gap-3">
+      <div class="flex items-center gap-2 text-red-700 font-bold text-xs shrink-0">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
+        <span>إضافة خبر عاجل فوري للشريط:</span>
+      </div>
+      <input [(ngModel)]="quickBreakingTitle" 
+             (keyup.enter)="addQuickBreakingNews($event)"
+             type="text" 
+             placeholder="اكتب عنوان الخبر العاجل هنا واضغط Enter للنشر الفوري..." 
+             class="flex-1 bg-white border border-red-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
+      <button (click)="addQuickBreakingNews($event)" 
+              class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer shrink-0">
+        بث عاجل
+      </button>
+    </div>
+
+    <!-- Articles List / Rows View (الأسطر تحت بعضها) -->
+    <div *ngIf="articlesViewMode === 'rows'" class="space-y-3">
+      <div *ngFor="let art of filteredArticles" 
+           class="bg-white rounded-2xl border border-stone-200 shadow-xs p-4 hover:border-stone-300 hover:shadow-sm transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <!-- Right Info: Thumb & Details -->
+        <div class="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+          <img [src]="art.featuredImage" 
+               alt="Thumb" 
+               class="w-20 h-16 sm:w-24 sm:h-18 object-cover rounded-xl shrink-0 border border-stone-200 shadow-2xs">
+          
+          <div class="min-w-0 flex-1 space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md text-[10px] font-bold">
+                {{ art.categoryName }}
+              </span>
+              <span [ngClass]="art.status === 'published' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                    class="px-2 py-0.5 rounded-md text-[10px] font-bold border">
+                {{ art.status === 'published' ? 'منشور' : 'مسودة' }}
+              </span>
+              <span *ngIf="art.isBreaking" class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                عاجل
+              </span>
+              <span *ngIf="art.isFeatured" class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                مميز بالرئيسية
+              </span>
+              <span *ngIf="art.isFactCheck" class="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded-md font-bold">
+                المصري فاكت
+              </span>
+            </div>
+
+            <a [routerLink]="['/article', art.id]" 
+               class="font-bold text-stone-900 text-sm sm:text-base hover:text-red-600 transition-colors line-clamp-1 block">
+              {{ art.title }}
+            </a>
+
+            <div class="flex flex-wrap items-center gap-3 text-[11px] text-stone-500">
+              <span class="flex items-center gap-1 font-medium text-stone-700">
+                ✍️ {{ art.authorName }}
+              </span>
+              <span>•</span>
+              <span>📅 {{ art.publishedAt | date:'mediumDate' }}</span>
+              <span>•</span>
+              <span>📍 {{ art.governorate || 'مصر' }}</span>
+              <span>•</span>
+              <span class="font-mono">👁 {{ art.views | number }} قراءة</span>
+              <span>•</span>
+              <span class="font-mono">❤️ {{ art.likesCount || 0 }} إعجاب</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Left Controls: Badges Toggles & Actions -->
+        <div class="flex items-center justify-between sm:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-stone-100 shrink-0">
+          <div class="flex items-center gap-1.5">
+            <button (click)="toggleBreaking(art)" 
+                    [ngClass]="art.isBreaking ? 'bg-red-600 text-white shadow-2xs' : 'bg-stone-100 text-stone-500 hover:text-stone-800'"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors" 
+                    title="تبديل العاجل">
+              عاجل
+            </button>
+            <button (click)="toggleFeatured(art)" 
+                    [ngClass]="art.isFeatured ? 'bg-amber-500 text-white shadow-2xs' : 'bg-stone-100 text-stone-500 hover:text-stone-800'"
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                    title="تبديل التمييز الرئيسي">
+              مميز
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button (click)="editArticle(art)" 
+                    class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-xl text-stone-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                    title="تعديل المقال">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>تعديل</span>
+            </button>
+            <a [routerLink]="['/article', art.id]" 
+               class="p-2 bg-stone-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl text-stone-600 transition-colors" 
+               title="معاينة بالموقع">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </a>
+            <button (click)="deleteArticle(art.id, art.title)" 
+                    class="p-2 bg-stone-100 hover:bg-red-50 hover:text-red-600 rounded-xl text-stone-600 transition-colors cursor-pointer"
+                    title="حذف المقال">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div *ngIf="filteredArticles.length === 0" class="bg-white rounded-2xl border border-stone-200 text-center py-12 text-stone-400 text-xs">
+        لا توجد مقالات مطابقة للبحث أو الفلتر المحدد.
+      </div>
+    </div>
+
+    <!-- Articles Table View (الجدول التقليدي) -->
+    <div *ngIf="articlesViewMode === 'table'" class="bg-white rounded-2xl border border-stone-200 shadow-xs overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold">
+            <tr>
+              <th class="p-4">الخبر والمحتوى</th>
+              <th class="p-4">القسم</th>
+              <th class="p-4">المحرر</th>
+              <th class="p-4">التفاعل</th>
+              <th class="p-4">الحالة</th>
+              <th class="p-4">الشارات</th>
+              <th class="p-4 text-center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100">
+            <tr *ngFor="let art of filteredArticles" class="hover:bg-stone-50/60 transition-colors">
+              <td class="p-4">
+                <div class="flex items-start gap-3">
+                  <img [src]="art.featuredImage" 
+                       alt="Thumb" 
+                       class="w-14 h-11 object-cover rounded-lg shrink-0 border border-stone-200">
+                  <div>
+                    <a [routerLink]="['/article', art.id]" 
+                       class="font-bold text-stone-900 hover:text-red-600 transition-colors line-clamp-1 block">
+                      {{ art.title }}
+                    </a>
+                    <span class="text-[10px] text-stone-400 block mt-0.5">{{ art.publishedAt | date:'mediumDate' }} • {{ art.governorate || 'مصر' }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <span class="bg-stone-100 text-stone-700 px-2 py-0.5 rounded text-[10px] font-bold">
+                  {{ art.categoryName }}
+                </span>
+              </td>
+              <td class="p-4 text-stone-600 font-medium">
+                {{ art.authorName }}
+              </td>
+              <td class="p-4 font-mono text-[11px] text-stone-500">
+                <span>👁 {{ art.views | number }}</span>
+                <span class="mx-1.5">•</span>
+                <span>❤️ {{ art.likesCount || 0 }}</span>
+              </td>
+              <td class="p-4">
+                <span [ngClass]="art.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
+                      class="px-2 py-0.5 rounded-full text-[10px] font-bold">
+                  {{ art.status === 'published' ? 'منشور' : 'مسودة' }}
+                </span>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-1.5">
+                  <button (click)="toggleBreaking(art)" 
+                          [ngClass]="art.isBreaking ? 'bg-red-600 text-white' : 'bg-stone-100 text-stone-400 hover:text-stone-700'"
+                          class="px-2 py-0.5 rounded text-[10px] font-black cursor-pointer transition-colors" 
+                          title="تبديل العاجل">
+                    عاجل
+                  </button>
+                  <button (click)="toggleFeatured(art)" 
+                          [ngClass]="art.isFeatured ? 'bg-amber-500 text-white' : 'bg-stone-100 text-stone-400 hover:text-stone-700'"
+                          class="px-2 py-0.5 rounded text-[10px] font-black cursor-pointer transition-colors"
+                          title="تبديل التمييز الرئيسي">
+                    مميز
+                  </button>
+                  <span *ngIf="art.isFactCheck" class="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded font-bold">
+                    فاكت
+                  </span>
+                </div>
+              </td>
+              <td class="p-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button (click)="editArticle(art)" 
+                          class="p-1.5 hover:bg-stone-200/80 rounded-lg text-stone-600 hover:text-stone-900 transition-colors cursor-pointer"
+                          title="تعديل المقال">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <a [routerLink]="['/article', art.id]" 
+                     class="p-1.5 hover:bg-stone-200/80 rounded-lg text-blue-600 transition-colors" 
+                     title="معاينة بالموقع">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </a>
+                  <button (click)="deleteArticle(art.id, art.title)" 
+                          class="p-1.5 hover:bg-red-100 rounded-lg text-red-500 hover:text-red-700 transition-colors cursor-pointer"
+                          title="حذف المقال">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="filteredArticles.length === 0" class="text-center py-12 text-stone-400 text-xs">
+        لا توجد مقالات مطابقة للبحث أو الفلتر المحدد.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 2: CREATE / EDIT ARTICLE FORM -->
+  <!-- ===================================================================== -->
+  <div *ngIf="activeTab === 'newArticle'" class="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-sm">
+    <div class="flex items-center justify-between pb-6 mb-6 border-b border-stone-100">
+      <div>
+        <h2 class="text-xl font-black text-stone-900">
+          {{ editingArticleId ? 'تعديل المقال الصحفي' : 'صياغة ونشر مقال صحفي جديد' }}
+        </h2>
+        <p class="text-xs text-stone-500 mt-1">
+          أدخل بيانات الخبر الصحفي الشامل مع إمكانية إرفاق وسائط وتحديد شارات البث.
+        </p>
+      </div>
+
+      <button *ngIf="editingArticleId" 
+              (click)="openNewArticleTab()" 
+              class="text-xs text-red-600 hover:underline font-bold">
+        + الانتقال لإضافة مقال فارغ
+      </button>
+    </div>
+
+    <form (submit)="saveArticleForm($event)" class="space-y-6 text-right">
+      <!-- Title & Subtitle -->
+      <div class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">عنوان المقال الرئيسي *</label>
+          <input [(ngModel)]="articleForm.title" name="artTitle" required type="text" 
+                 placeholder="أدخل عنواناً جذاباً ودقيقاً ومطابقاً لقواعد التحرير الصحفي..."
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-red-600">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">العنوان الفرعي (Subtitle)</label>
+          <input [(ngModel)]="articleForm.subtitle" name="artSubtitle" type="text" 
+                 placeholder="سطر توضيحي ملخص لأبرز نقاط الخبر..."
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-600">
+        </div>
+      </div>
+
+      <!-- Category, Author & Governorate -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">القسم الإخباري *</label>
+          <select [(ngModel)]="articleForm.categoryId" name="artCategory" 
+                  class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-red-600">
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">الكاتب والمراسل *</label>
+          <select [(ngModel)]="articleForm.authorId" name="artAuthor" 
+                  class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-red-600">
+            <option *ngFor="let a of authors" [value]="a.id">{{ a.name }} ({{ a.role }})</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">المحافظة / الموقع الجغرافي</label>
+          <input [(ngModel)]="articleForm.governorate" name="artGov" type="text" placeholder="مثال: القاهرة، الإسكندرية، الجيزة..."
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-red-600">
+        </div>
+      </div>
+
+      <!-- Featured Image & Caption -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-stone-700">صورة الخبر الرئيسية *</label>
+            <label class="cursor-pointer bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-colors">
+              <input type="file" accept="image/*" (change)="onArticleImageFileSelected($event)" class="hidden">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span>تحميل من جهازك</span>
+            </label>
+          </div>
+          <input [(ngModel)]="articleForm.featuredImage" name="artImage" type="text" 
+                 placeholder="أو ضع رابط صورة مباشر من الإنترنت..."
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-red-600">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">تعليق الصورة (Image Caption)</label>
+          <input [(ngModel)]="articleForm.imageCaption" name="artCaption" type="text" placeholder="مصدر الصورة أو وصف المشهد..."
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-red-600">
+        </div>
+      </div>
+
+      <!-- Live Image Preview with Clear Option -->
+      <div *ngIf="articleForm.featuredImage" class="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+          <img [src]="articleForm.featuredImage" 
+               alt="Preview" 
+               referrerpolicy="no-referrer"
+               class="w-28 h-20 sm:w-36 sm:h-24 object-cover rounded-xl border border-stone-300 shadow-2xs shrink-0">
+          <div class="text-xs text-stone-600 min-w-0">
+            <span class="font-bold text-stone-900 block mb-0.5">معاينة صورة الخبر الحالية</span>
+            <span class="text-stone-500 text-[11px] block truncate">{{ articleForm.imageCaption || 'بدون تعليق توضيحي' }}</span>
+            <span class="text-emerald-700 font-bold text-[10px] mt-1 inline-flex items-center gap-1">
+              ✓ تم تعيين الصورة بنجاح وستظهر مباشرة بالخبر
+            </span>
+          </div>
+        </div>
+
+        <button type="button" 
+                (click)="articleForm.featuredImage = ''" 
+                class="px-3 py-1.5 bg-white border border-stone-300 hover:border-red-300 hover:text-red-600 text-stone-600 text-xs font-bold rounded-xl transition-colors cursor-pointer shrink-0"
+                title="تغيير أو مسح الصورة">
+          مسح الصورة
+        </button>
+      </div>
+
+      <!-- Excerpt -->
+      <div>
+        <label class="block text-xs font-bold text-stone-700 mb-1.5">مقتطف الخبر (Excerpt)</label>
+        <textarea [(ngModel)]="articleForm.excerpt" name="artExcerpt" rows="2" 
+                  placeholder="موجز سريع يظهر في الكروت وبطاقات المعاينة ومحركات البحث..."
+                  class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-red-600"></textarea>
+      </div>
+
+      <!-- Full Content -->
+      <div>
+        <label class="block text-xs font-bold text-stone-700 mb-1.5">المحتوى الكامل للمقال *</label>
+        <textarea [(ngModel)]="articleForm.content" name="artContent" rows="8" required
+                  placeholder="اكتب التغطية الصحفية والتحقيق الكامل هنا..."
+                  class="w-full bg-stone-50 border border-stone-200 rounded-xl p-4 text-xs leading-relaxed focus:outline-none focus:border-red-600"></textarea>
+      </div>
+
+      <!-- Video Support (Optional) -->
+      <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200">
+        <span class="text-xs font-bold text-stone-800 block mb-3">🎥 محتوى مرئي / فيديو مرفق بالمقال (YouTube أو MP4)</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input [(ngModel)]="articleForm.videoUrl" name="artVidUrl" type="text" placeholder="رابط فيديو YouTube أو MP4..."
+                 class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs font-mono text-left">
+          <input [(ngModel)]="articleForm.videoTitle" name="artVidTitle" type="text" placeholder="عنوان أو وصف الفيديو..."
+                 class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+
+        <!-- Live Video Player Preview -->
+        <div *ngIf="parsedArticleVideo" class="mt-3 bg-stone-900 p-2 rounded-2xl max-w-md">
+          <div class="text-[11px] text-stone-300 font-bold mb-1.5 px-1 flex items-center justify-between">
+            <span>معاينة مشغل الفيديو التفاعلي:</span>
+            <span class="text-emerald-400 font-mono">جاهز للعرض ✓</span>
+          </div>
+          <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
+            <iframe *ngIf="parsedArticleVideo.type === 'youtube'" 
+                    [src]="parsedArticleVideo.embedUrl | safe:'resourceUrl'" 
+                    class="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+            <video *ngIf="parsedArticleVideo.type === 'mp4'" 
+                   [src]="parsedArticleVideo.embedUrl | safe:'resourceUrl'" 
+                   controls 
+                   class="w-full h-full">
+            </video>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags & Status -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">الوسوم والكلمات المفتاحية (مفصولة بفاصلة)</label>
+          <input [(ngModel)]="articleForm.tagsString" name="artTags" type="text" 
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">حالة النشر</label>
+          <select [(ngModel)]="articleForm.status" name="artStatus" 
+                  class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-xs">
+            <option value="published">منشور فوراً (Published)</option>
+            <option value="draft">حفظ كمسودة (Draft)</option>
+            <option value="archived">أرشيف (Archived)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Badges & Fact-Check Checkboxes -->
+      <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+        <span class="text-xs font-bold text-stone-800 block">خيارات البث والتمييز:</span>
+        <div class="flex flex-wrap items-center gap-6 text-xs">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="articleForm.isBreaking" name="artIsBreaking" class="w-4 h-4 text-red-600 rounded">
+            <span class="font-bold text-red-700">تمييز كـ "خبر عاجل" (وإرساله للشريط الرئيسي)</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="articleForm.isFeatured" name="artIsFeatured" class="w-4 h-4 text-amber-600 rounded">
+            <span class="font-bold text-amber-700">تمييز في المساحة الرئيسية الكبرى</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="articleForm.isEditorChoice" name="artIsEditorChoice" class="w-4 h-4 text-blue-600 rounded">
+            <span class="font-bold text-blue-700">اختيار رئيس التحرير</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="articleForm.isFactCheck" name="artIsFactCheck" class="w-4 h-4 text-purple-600 rounded">
+            <span class="font-bold text-purple-700">تدقيق شائعات (وحدة "المصري فاكت")</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Fact-Check details (if enabled) -->
+      <div *ngIf="articleForm.isFactCheck" class="p-5 bg-purple-50/70 rounded-2xl border border-purple-200 space-y-4">
+        <div class="flex items-center gap-2 text-purple-900 font-bold text-xs">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span>بيانات تدقيق الشائعة (المصري فاكت):</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-purple-800 mb-1">الادعاء المتداول</label>
+            <input [(ngModel)]="articleForm.factClaim" name="factClaim" type="text" placeholder="نص الشائعة المتداولة..."
+                   class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-purple-800 mb-1">حكم التحقق</label>
+            <select [(ngModel)]="articleForm.factVerdict" name="factVerdict" 
+                    class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs">
+              <option value="false">غير صحيح (False)</option>
+              <option value="misleading">مضلل (Misleading)</option>
+              <option value="true">صحيح (True)</option>
+              <option value="partially_true">صحيح جزئياً (Partially True)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-purple-800 mb-1">الحقيقة الموثقة بالأدلة الرسمية</label>
+          <textarea [(ngModel)]="articleForm.factTruth" name="factTruth" rows="2" placeholder="المعلومة الحقيقية الموثقة مع المصادر الرسمية..."
+                    class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs"></textarea>
+        </div>
+      </div>
+
+      <!-- Submit & Reset Buttons -->
+      <div class="flex items-center gap-4 pt-4 border-t border-stone-100">
+        <button type="submit" 
+                class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-8 py-3 rounded-2xl shadow-lg transition-all cursor-pointer">
+          {{ editingArticleId ? 'حفظ وتحديث المقال' : 'نشر المقال فوراً' }}
+        </button>
+
+        <button type="button" 
+                (click)="activeTab = 'articles'" 
+                class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs px-6 py-3 rounded-2xl transition-colors cursor-pointer">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 3: USER & EDITORIAL TEAM MANAGEMENT -->
+  <!-- ===================================================================== -->
+  <div *ngIf="activeTab === 'users'">
+    <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-black text-stone-900">إدارة المسؤولين، طاقم التحرير، والعملاء</h2>
+        <p class="text-xs text-stone-500 mt-0.5">إدارة كاملة لحسابات المسؤولين، المحررين، والعملاء التجاريين مع تحميل الصور من الجهاز أو الإنترنت.</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+        <!-- Add Official Button -->
+        <button (click)="openAddOfficialModal()" 
+                class="bg-stone-900 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-md transition-all flex items-center gap-2 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+          <span>+ إضافة مسؤول / محرر</span>
+        </button>
+
+        <!-- Add Client Button -->
+        <button (click)="openAddClientModal()" 
+                class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-md transition-all flex items-center gap-2 cursor-pointer">
+          <span>🤝 + إضافة عميل / معلن</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- User Filters -->
+    <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs mb-6 flex flex-col sm:flex-row gap-3">
+      <input [(ngModel)]="userSearch" type="text" placeholder="ابحث باسم المسؤول، العميل، البريد، أو الهاتف..." 
+             class="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-red-600">
+      
+      <select [(ngModel)]="selectedRoleFilter" class="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-bold text-stone-700">
+        <option value="all">كافة الحسابات (المسؤولون والعملاء)</option>
+        <option value="officials">👑 المسؤولون وهيئة التحرير والإدارة</option>
+        <option value="clients">💼 العملاء والشركاء التجاريون والمعلنون</option>
+        <option value="subscribers">👥 المشتركون والقراء</option>
+        <option value="superadmin">المدير العام ورئيس التحرير</option>
+        <option value="admin">مسؤول إدارة ومدير تحرير</option>
+        <option value="editor">محرر صحفي مسؤول</option>
+        <option value="journalist">صحفي ومراسل ميداني</option>
+        <option value="client">عميل معتمد / شريك إعلاني</option>
+      </select>
+
+      <select [(ngModel)]="selectedUserStatusFilter" class="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs">
+        <option value="all">كافة الحالات</option>
+        <option value="active">نشط فقط</option>
+        <option value="inactive">معطل</option>
+      </select>
+    </div>
+
+    <!-- Users Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div *ngFor="let u of filteredUsers" 
+           class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-xs flex flex-col justify-between text-right">
+        <div>
+          <div class="flex items-start gap-3 mb-3">
+            <img [src]="u.avatar" alt="Avatar" class="w-12 h-12 rounded-xl object-cover ring-1 ring-stone-200">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-stone-900 text-sm truncate">{{ u.name }}</h3>
+                <span [ngClass]="getRoleBadge(u.role).class" 
+                      class="text-[9px] font-black px-2 py-0.5 rounded-full border">
+                  {{ getRoleBadge(u.role).text }}
+                </span>
+              </div>
+              <p class="text-[11px] text-stone-400 truncate mt-0.5">{{ u.email }}</p>
+              <p class="text-[11px] text-stone-500 mt-1 font-medium">{{ u.department || 'هيئة التحرير' }}</p>
+            </div>
+          </div>
+
+          <p *ngIf="u.bio" class="text-xs text-stone-600 line-clamp-2 bg-stone-50 p-2.5 rounded-xl border border-stone-100 mb-3">
+            {{ u.bio }}
+          </p>
+        </div>
+
+        <div class="pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5">
+            <span [ngClass]="u.isActive ? 'bg-emerald-500' : 'bg-stone-300'" class="w-2 h-2 rounded-full"></span>
+            <span class="text-[11px] text-stone-500">{{ u.isActive ? 'حساب نشط' : 'معطل' }}</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button (click)="toggleUserActive(u)" 
+                    class="text-[10px] font-bold px-2.5 py-1 rounded-lg border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              {{ u.isActive ? 'تعطيل' : 'تفعيل' }}
+            </button>
+            <button (click)="openEditUserModal(u)" 
+                    class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 cursor-pointer">
+              تعديل
+            </button>
+            <button *ngIf="u.role !== 'superadmin'" 
+                    (click)="deleteUser(u)" 
+                    class="text-[10px] font-bold px-2.5 py-1 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer">
+              حذف
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 4: SYSTEM THEME & BRAND IDENTITY -->
+  <!-- ===================================================================== -->
+  <div *ngIf="activeTab === 'theme'" class="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-sm max-w-4xl text-right">
+    <div class="pb-6 mb-6 border-b border-stone-100">
+      <h2 class="text-xl font-black text-stone-900">هوية وألوان وشعار المنصة</h2>
+      <p class="text-xs text-stone-500 mt-1">تخصيص الهوية البصرية، ألوان البراند، شعار الموقع، والشعار اللفظي.</p>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Brand Names -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">اسم المنصة الإخبارية</label>
+          <input [(ngModel)]="settings.siteName" type="text" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1.5">الشعار اللفظي (Tagline)</label>
+          <input [(ngModel)]="settings.tagline" type="text" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs">
+        </div>
+      </div>
+
+      <!-- Color Presets -->
+      <div>
+        <label class="block text-xs font-bold text-stone-700 mb-2">اللون الأساسي للهوية (Primary Brand Color)</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+          <button *ngFor="let c of presetColors" 
+                  (click)="setPresetColor(c.value)"
+                  [ngClass]="settings.primaryColor === c.value ? 'ring-2 ring-stone-900 border-transparent' : 'border-stone-200'"
+                  class="p-3 rounded-2xl border flex items-center gap-2.5 text-xs font-bold text-stone-700 hover:bg-stone-50 cursor-pointer">
+            <span [style.background-color]="c.value" class="w-5 h-5 rounded-full shadow-xs shrink-0"></span>
+            <span class="truncate">{{ c.name }}</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-stone-500">أو كود اللون المخصص (Hex):</span>
+          <input [(ngModel)]="settings.primaryColor" type="text" class="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 text-xs font-mono w-28">
+        </div>
+      </div>
+
+      <!-- Live Brand Identity Preview Card -->
+      <div class="p-6 rounded-2xl border border-stone-200 bg-stone-900 text-white shadow-lg">
+        <span class="text-[11px] text-stone-400 block mb-3 font-mono">معاينة مباشرة لهوية وشعار الموقع:</span>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-white text-xl shadow-md"
+               [style.background-color]="settings.primaryColor">
+            م
+          </div>
+          <div>
+            <h3 class="text-xl font-black">{{ settings.siteName }}</h3>
+            <p class="text-xs text-stone-400 mt-0.5">{{ settings.tagline }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 pt-4 border-t border-stone-100">
+        <button (click)="saveThemeSettings()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-8 py-3 rounded-2xl shadow-md cursor-pointer">
+          حفظ إعدادات الهوية
+        </button>
+        <button (click)="resetThemeDefaults()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs px-6 py-3 rounded-2xl cursor-pointer">
+          استعادة الافتراضي
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 5: DISPLAY & HOMEPAGE SETTINGS -->
+  <!-- ===================================================================== -->
+  <div *ngIf="activeTab === 'display'" class="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-sm max-w-4xl text-right">
+    <div class="pb-6 mb-6 border-b border-stone-100">
+      <h2 class="text-xl font-black text-stone-900">إعدادات عرض الأخبار والصفحة الرئيسية</h2>
+      <p class="text-xs text-stone-500 mt-1">التحكم في طريقة توزيع البطاقات، شريط العاجل، وتفضيلات القراءة.</p>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Layout Mode -->
+      <div>
+        <label class="block text-xs font-bold text-stone-700 mb-2">نمط عرض كروت الأخبار (Card Layout)</label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button (click)="settings.newsCardLayout = 'grid'" 
+                  [ngClass]="settings.newsCardLayout === 'grid' ? 'border-red-600 bg-red-50/50 ring-2 ring-red-500/20' : 'border-stone-200'"
+                  class="p-4 rounded-2xl border text-right cursor-pointer">
+            <strong class="text-xs text-stone-900 block font-bold">شبكي (Grid 3 أعمدة)</strong>
+            <span class="text-[11px] text-stone-500 block mt-1">النمط العصري الشامل الأكثر تفضيلاً للمواقع الكبرى.</span>
+          </button>
+
+          <button (click)="settings.newsCardLayout = 'magazine'" 
+                  [ngClass]="settings.newsCardLayout === 'magazine' ? 'border-red-600 bg-red-50/50 ring-2 ring-red-500/20' : 'border-stone-200'"
+                  class="p-4 rounded-2xl border text-right cursor-pointer">
+            <strong class="text-xs text-stone-900 block font-bold">مجلة إخبارية (Magazine)</strong>
+            <span class="text-[11px] text-stone-500 block mt-1">تركيز عالٍ على المقالات الطويلة والتحقيقات المصورة.</span>
+          </button>
+
+          <button (click)="settings.newsCardLayout = 'compact'" 
+                  [ngClass]="settings.newsCardLayout === 'compact' ? 'border-red-600 bg-red-50/50 ring-2 ring-red-500/20' : 'border-stone-200'"
+                  class="p-4 rounded-2xl border text-right cursor-pointer">
+            <strong class="text-xs text-stone-900 block font-bold">مدمج ومكثف (Compact)</strong>
+            <span class="text-[11px] text-stone-500 block mt-1">كثافة عالية للأخبار العاجلة والصفحات الاقتصادية.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Breaking News Ticker Options -->
+      <div class="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+        <span class="text-xs font-bold text-stone-800 block">إعدادات شريط الأخبار العاجلة:</span>
+        <label class="flex items-center gap-2.5 cursor-pointer">
+          <input type="checkbox" [(ngModel)]="settings.breakingNewsEnabled" class="w-4 h-4 text-red-600 rounded">
+          <span class="text-xs font-bold text-stone-800">تفعيل شريط الأخبار العاجلة في أعلى الموقع</span>
+        </label>
+      </div>
+
+      <!-- Comments Settings -->
+      <div class="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
+        <span class="text-xs font-bold text-stone-800 block">إعدادات تفاعل وتعليقات القراء:</span>
+        <div class="space-y-2.5">
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="settings.enableComments" class="w-4 h-4 text-blue-600 rounded">
+            <span class="text-xs font-bold text-stone-800">السماح بتعليقات القراء على المقالات</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="settings.moderationRequired" class="w-4 h-4 text-blue-600 rounded">
+            <span class="text-xs font-bold text-stone-800">اشتراط مراجعة وموافقة الإدارة قبل ظهور التعليق للعامة</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="settings.allowGuestComments" class="w-4 h-4 text-blue-600 rounded">
+            <span class="text-xs font-bold text-stone-800">السماح للزوار غير المسجلين بالتعليق</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <div class="pt-4 border-t border-stone-100">
+        <button (click)="saveDisplaySettings()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-8 py-3 rounded-2xl shadow-md cursor-pointer">
+          حفظ إعدادات العرض
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 6: ANALYTICS & INSIGHTS -->
+  <!-- ===================================================================== -->
+  <div *ngIf="activeTab === 'analytics'" class="space-y-6 text-right">
+    <!-- Big Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs">
+        <span class="text-xs text-stone-500 font-bold block">إجمالي الزيارات الشهرية</span>
+        <strong class="text-3xl font-black text-stone-900 font-mono block mt-2">458,900+</strong>
+        <span class="text-[11px] text-emerald-600 font-bold block mt-1">↑ زيادة 14.8% عن الشهر السابق</span>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs">
+        <span class="text-xs text-stone-500 font-bold block">زيارات اليوم المباشرة</span>
+        <strong class="text-3xl font-black text-emerald-600 font-mono block mt-2">24,500+</strong>
+        <span class="text-[11px] text-stone-400 font-medium block mt-1">معدل قراءة 3.8 دقيقة لكل زائر</span>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs">
+        <span class="text-xs text-stone-500 font-bold block">معدل التفاعل الإيجابي</span>
+        <strong class="text-3xl font-black text-blue-600 font-mono block mt-2">94.2%</strong>
+        <span class="text-[11px] text-stone-400 font-medium block mt-1">إعجابات، تعليقات ومشاركات</span>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs">
+        <span class="text-xs text-stone-500 font-bold block">المشتركون في النشرة البريدية</span>
+        <strong class="text-3xl font-black text-purple-600 font-mono block mt-2">1,480</strong>
+        <span class="text-[11px] text-purple-600 font-bold block mt-1">مشترك نشط وموثق</span>
+      </div>
+    </div>
+
+    <!-- Category Performance Distribution -->
+    <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs">
+      <h3 class="text-base font-black text-stone-900 mb-4">توزيع التفاعل والقراءات حسب الأقسام</h3>
+      <div class="space-y-4">
+        <div>
+          <div class="flex justify-between text-xs font-bold mb-1">
+            <span>مصر والمحافظات</span>
+            <span class="font-mono">125,000 قراءة (38%)</span>
+          </div>
+          <div class="w-full bg-stone-100 rounded-full h-2.5 overflow-hidden">
+            <div class="bg-red-600 h-2.5 rounded-full" style="width: 38%"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs font-bold mb-1">
+            <span>رياضة (الدوري المصري والأهلي والزمالك)</span>
+            <span class="font-mono">142,000 قراءة (32%)</span>
+          </div>
+          <div class="w-full bg-stone-100 rounded-full h-2.5 overflow-hidden">
+            <div class="bg-emerald-600 h-2.5 rounded-full" style="width: 32%"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs font-bold mb-1">
+            <span>اقتصاد وأسواق المال</span>
+            <span class="font-mono">98,000 قراءة (21%)</span>
+          </div>
+          <div class="w-full bg-stone-100 rounded-full h-2.5 overflow-hidden">
+            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 21%"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs font-bold mb-1">
+            <span>المصري فاكت (مكافحة الشائعات)</span>
+            <span class="font-mono">45,000 قراءة (9%)</span>
+          </div>
+          <div class="w-full bg-stone-100 rounded-full h-2.5 overflow-hidden">
+            <div class="bg-purple-600 h-2.5 rounded-full" style="width: 9%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top 5 Most Read Articles -->
+    <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs">
+      <h3 class="text-base font-black text-stone-900 mb-4">أكثر الأخبار قراءة وتفاعلاً هذا الأسبوع</h3>
+      <div class="divide-y divide-stone-100">
+        <div *ngFor="let art of articles.slice(0, 5); let i = index" class="py-3 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-800 font-mono font-black flex items-center justify-center text-xs shrink-0">
+              0{{ i + 1 }}
+            </span>
+            <img [src]="art.featuredImage" alt="Thumb" class="w-12 h-10 object-cover rounded-lg border border-stone-200 shrink-0">
+            <div>
+              <a [routerLink]="['/article', art.id]" class="font-bold text-stone-900 text-xs hover:text-red-600 line-clamp-1 block">
+                {{ art.title }}
+              </a>
+              <span class="text-[10px] text-stone-400">{{ art.categoryName }} • {{ art.authorName }}</span>
+            </div>
+          </div>
+
+          <div class="font-mono text-xs font-bold text-stone-700 shrink-0">
+            👁 {{ art.views | number }} قراءة
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ADD / EDIT USER MODAL DIALOG (مسؤول / عميل) -->
+  <!-- ===================================================================== -->
+  <div *ngIf="showUserModal" 
+       class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 text-right animate-scale border border-stone-200 my-8 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-stone-100">
+        <div>
+          <h3 class="text-lg font-black text-stone-900 flex items-center gap-2">
+            <span>{{ isClientRole ? '💼' : '👑' }}</span>
+            <span>{{ editingUserId ? (isClientRole ? 'تعديل بيانات العميل / الشريك' : 'تعديل بيانات المسؤول') : (isClientRole ? 'إضافة عميل / معلن تجاري جديد' : 'إضافة مسؤول إداري أو محرر جديد') }}</span>
+          </h3>
+          <p class="text-[11px] text-stone-500 mt-0.5">
+            {{ isClientRole ? 'بيانات الشركاء الإعلانيين والعملاء التجاريين' : 'بيانات أعضاء هيئة التحرير ومسؤولي الإدارة' }}
+          </p>
+        </div>
+        <button (click)="showUserModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center cursor-pointer font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- If adding new: Quick Toggle between Official vs Client -->
+      <div *ngIf="!editingUserId" class="mb-4 bg-stone-100 p-1 rounded-2xl flex items-center gap-1 text-xs font-bold">
+        <button type="button" 
+                (click)="userForm.role = 'editor'; onUserRoleChange()"
+                [ngClass]="!isClientRole ? 'bg-stone-900 text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'"
+                class="flex-1 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>👑 مسؤول / محرر صحفي</span>
+        </button>
+        <button type="button" 
+                (click)="userForm.role = 'client'; onUserRoleChange()"
+                [ngClass]="isClientRole ? 'bg-teal-700 text-white shadow-xs' : 'text-stone-600 hover:text-stone-900'"
+                class="flex-1 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>💼 عميل / معلن وشريك</span>
+        </button>
+      </div>
+
+      <!-- Photo Upload Card (تحميل من الجهاز أو رابط نت) -->
+      <div class="mb-4 p-4 bg-amber-50/60 rounded-2xl border border-amber-200/80">
+        <label class="block font-black text-stone-900 text-xs mb-2">
+          <span>📷 صورة الحساب الشخصية (مسؤول / عميل)</span>
+          <span class="text-red-600 mr-1">*</span>
+        </label>
+        
+        <div class="flex flex-col sm:flex-row items-center gap-4">
+          <!-- Avatar Preview -->
+          <div class="relative w-20 h-20 rounded-2xl overflow-hidden bg-white border-2 border-amber-300 shadow-sm shrink-0 flex items-center justify-center group">
+            <img *ngIf="userForm.avatar" [src]="userForm.avatar" alt="Avatar Preview" class="w-full h-full object-cover">
+            <span *ngIf="!userForm.avatar" class="text-3xl text-stone-300">👤</span>
+            <button *ngIf="userForm.avatar" (click)="userForm.avatar = ''" type="button" title="إزالة الصورة" class="absolute inset-0 bg-black/60 text-white text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+              إزالة
+            </button>
+          </div>
+
+          <!-- Actions: Device Upload OR Internet URL -->
+          <div class="flex-1 w-full space-y-2">
+            <!-- 1. Device Upload Button -->
+            <label class="w-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-800 font-bold py-2 px-3 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-2 text-xs shadow-xs">
+              <span>📁 تحميل صورة من جهازك (كمبيوتر / هاتف)</span>
+              <input type="file" accept="image/*" (change)="onUserAvatarFileSelected($event)" class="hidden">
+            </label>
+
+            <!-- 2. Web URL -->
+            <div>
+              <input
+                [(ngModel)]="userForm.avatar"
+                type="url"
+                placeholder="أو ضع رابط صورة مباشر من الإنترنت (https://...)"
+                class="w-full bg-white border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-left font-mono focus:border-red-500 focus:outline-hidden"
+              />
+            </div>
+
+            <!-- Presets -->
+            <div class="flex flex-wrap items-center gap-2 pt-0.5 text-[11px] text-stone-500">
+              <span class="font-bold text-stone-700">صور مقترحة:</span>
+              <button type="button" (click)="setPresetAvatar('male1')" class="text-blue-700 hover:underline font-bold cursor-pointer">شخصية 1</button>
+              <span>•</span>
+              <button type="button" (click)="setPresetAvatar('female1')" class="text-blue-700 hover:underline font-bold cursor-pointer">شخصية 2</button>
+              <span>•</span>
+              <button type="button" (click)="setPresetAvatar('client')" class="text-teal-700 hover:underline font-bold cursor-pointer">لوجو شركة/عميل</button>
+              <span>•</span>
+              <button type="button" (click)="setPresetAvatar('admin')" class="text-purple-700 hover:underline font-bold cursor-pointer">مسؤول إداري</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">
+            {{ isClientRole ? 'اسم العميل / اسم الشركة الراعية *' : 'الاسم الكامل للمسؤول / المحرر *' }}
+          </label>
+          <input [(ngModel)]="userForm.name" type="text" 
+                 [placeholder]="isClientRole ? 'مثال: شركة النيل للتطوير العقاري / د. سامح ممدوح' : 'مثال: أحمد عبد الله الشافعي'"
+                 class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:border-stone-400 focus:outline-hidden">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">البريد الإلكتروني *</label>
+            <input [(ngModel)]="userForm.email" type="email" 
+                   [placeholder]="isClientRole ? 'client@company.com' : 'editor@almasry-news.eg'"
+                   class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:border-stone-400 focus:outline-hidden text-left font-mono">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">كلمة المرور</label>
+            <input [(ngModel)]="userForm.password" type="password" placeholder="123456"
+                   class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:border-stone-400 focus:outline-hidden">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">نوع الحساب والصلاحية *</label>
+            <select [(ngModel)]="userForm.role" (change)="onUserRoleChange()" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-bold text-stone-800 focus:border-stone-400 focus:outline-hidden">
+              <optgroup label="المسؤولون وهيئة التحرير والإدارة">
+                <option value="superadmin">المدير العام ورئيس التحرير (Superadmin)</option>
+                <option value="admin">مسؤول إدارة ومدير تحرير تنفيذي (Admin)</option>
+                <option value="editor">محرر صحفي مسؤول (Editor)</option>
+                <option value="journalist">صحفي ومراسل ميداني (Journalist)</option>
+                <option value="photographer">مصور صحفي معتمد (Photographer)</option>
+                <option value="video_editor">مونتير ومحرر فيديو (Video Editor)</option>
+                <option value="moderator">مدقق ومراجع محتوى (Moderator)</option>
+              </optgroup>
+              <optgroup label="العملاء والشركاء التجاريون">
+                <option value="client">عميل معتمد / شريك إعلاني ورعايات (Client)</option>
+                <option value="subscriber">مشترك مميز في الصحيفة (Subscriber)</option>
+                <option value="user">قارئ ومستخدم مسجل (User)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">
+              {{ isClientRole ? 'المسمى التجاري / نوع الشراكة' : 'المسمى الوظيفي الشرفي' }}
+            </label>
+            <input [(ngModel)]="userForm.roleTitle" type="text" 
+                   [placeholder]="isClientRole ? 'مثال: راعي ذهبي / شريك إعلاني' : 'مثال: رئيس قسم التحقيقات'"
+                   class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:border-stone-400 focus:outline-hidden">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">
+              {{ isClientRole ? 'الشركة / النشاط التجاري' : 'القسم / الإدارة التحريرية' }}
+            </label>
+            <input [(ngModel)]="userForm.department" type="text" 
+                   [placeholder]="isClientRole ? 'مثال: قطاع العقارات والمقاولات' : 'مثال: قسم الشؤون الاقتصادية'"
+                   class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:border-stone-400 focus:outline-hidden">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">رقم الهاتف / واتساب</label>
+            <input [(ngModel)]="userForm.phone" type="text" placeholder="01012345678"
+                   class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-left font-mono focus:border-stone-400 focus:outline-hidden">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">
+            {{ isClientRole ? 'نبذة عن العميل / تفاصيل التعاقد' : 'نبذة تعريفية (Bio)' }}
+          </label>
+          <textarea [(ngModel)]="userForm.bio" rows="2" 
+                    [placeholder]="isClientRole ? 'تفاصيل موجزة عن نشاط العميل أو الشراكة الإعلانية...' : 'سيرة مهنية مختصرة للمحرر...'"
+                    class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:border-stone-400 focus:outline-hidden"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" [(ngModel)]="userForm.isActive" id="chkActive" class="w-4 h-4 text-emerald-600 rounded">
+          <label for="chkActive" class="font-bold text-stone-800 cursor-pointer">
+            {{ isClientRole ? 'حساب العميل نشط ومفعل' : 'حساب المسؤول نشط ومفعل فوراً' }}
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-5 pt-4 border-t border-stone-100">
+        <button (click)="saveUserModal()" 
+                [ngClass]="isClientRole ? 'bg-teal-700 hover:bg-teal-800' : 'bg-stone-900 hover:bg-black'"
+                class="text-white font-bold text-xs px-6 py-2.5 rounded-xl cursor-pointer shadow-md transition-all">
+          {{ editingUserId ? 'حفظ التعديلات' : (isClientRole ? 'حفظ وإضافة العميل' : 'حفظ وإضافة المسؤول') }}
+        </button>
+        <button (click)="showUserModal = false" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,18 @@
+{
+  "short_name": "المنصة الإخبارية",
+  "name": "المنصة الإخبارية العربية",
+  "description": "منصة إخبارية عربية شاملة ومتكاملة: أخبار عاجلة، تقارير وتحقيقات، تغطية حية لحظة بلحظة.",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar"
+}
