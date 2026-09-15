@@ -25,23 +25,41 @@ if %errorlevel% neq 0 (
 
 cd ..
 
-echo [3/3] جاري التأكد من ملف web.config وقاعدة البيانات...
+echo [3/4] جاري التأكد من مجلد wwwroot وملف web.config...
+if not exist publish_monsterasp\wwwroot (
+    mkdir publish_monsterasp\wwwroot
+)
+xcopy /E /I /Y backend\wwwroot publish_monsterasp\wwwroot > nul
+
 if exist backend\web.config (
-    copy backend\web.config publish_monsterasp\web.config > nul
+    copy /Y backend\web.config publish_monsterasp\web.config > nul
 )
 if exist Database_Setup.sql (
-    copy Database_Setup.sql publish_monsterasp\Database_Setup.sql > nul
+    copy /Y Database_Setup.sql publish_monsterasp\Database_Setup.sql > nul
+)
+
+echo [4/4] جاري فحص محتويات مجلد النشر...
+if exist publish_monsterasp\wwwroot\index.html (
+    echo [✓] تم التحقق بنجاح: ملف wwwroot\index.html جاهز وموجود داخل مجلد النشر!
+) else (
+    echo [!] تنبيه: يرجى التأكد من وجود ملفات Angular داخل backend\wwwroot.
 )
 
 echo.
 echo ================================================================
-echo   ✅ تم إنشاء مجلد النشر بنجاح: publish_monsterasp
+echo   ✅ تم إنشاء وتجهيز مجلد النشر بنجاح: publish_monsterasp
 echo ================================================================
-echo   الخطوة التالية:
+echo   مجلد publish_monsterasp يحتوي الآن على:
+echo   1. مجلد wwwroot (وفيه واجهة الموقع Angular بالكامل: HTML, CSS, JS)
+echo   2. ملف AlmasryNews.Api.dll (سيرفر الباك إند)
+echo   3. ملف web.config (إعدادات استضافة MonsterASP وخادم IIS)
+echo   4. ملف Database_Setup.sql (قاعدة بيانات SQL Server)
+echo.
+echo   الخطوة التالية للرفع على MonsterASP.NET:
 echo   1. افتح المجلد: publish_monsterasp
 echo   2. حدد جميع الملفات التي بداخله واضغط Right Click -> Send to Compressed ZIP.
 echo   3. ارفع ملف الـ ZIP إلى File Manager في لوحة تحكم MonsterASP.
-echo   4. قم بعمل Extract داخل مجلد site / wwwroot.
+echo   4. قم بعمل Extract داخل مجلد الموقع الرئيسي (site / wwwroot).
 echo ================================================================
 echo.
 pause

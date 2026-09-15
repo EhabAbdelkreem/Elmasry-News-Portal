@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="100%" stop-color="#0c0a09" />
+    </linearGradient>
+  </defs>
+  <!-- Background with subtle corner curve -->
+  <rect width="64" height="64" rx="14" fill="url(#bgGrad)" />
+  <!-- Stylized news lines -->
+  <rect x="14" y="15" width="22" height="6" rx="3" fill="#ffffff" />
+  <rect x="14" y="25" width="36" height="4" rx="2" fill="#e7e5e4" />
+  <rect x="14" y="33" width="36" height="4" rx="2" fill="#a8a29e" />
+  <rect x="14" y="41" width="24" height="4" rx="2" fill="#78716c" />
+  <!-- Red News Accent Dot -->
+  <circle cx="48" cy="18" r="6" fill="#dc2626" />
+</svg>

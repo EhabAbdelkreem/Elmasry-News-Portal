@@ -36,12 +36,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure Swagger to open directly at the root URL (or /swagger)
+// Configure Swagger (available at /swagger)
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "بوابة المصري الإخباري API v1");
-    c.RoutePrefix = string.Empty; // Makes Swagger the default homepage at http://localhost:PORT/
+    c.RoutePrefix = "swagger";
 });
 
 app.UseCors("AllowAll");
@@ -52,13 +52,16 @@ app.UseStaticFiles();
 app.UseAuthorization();
 app.MapControllers();
 
-// Welcome / health check info endpoint
+// Health check endpoint
 app.MapGet("/api/status", () => Results.Ok(new
 {
     status = "running",
     name = "بوابة المصري الإخباري - ASP.NET Core 8 Web API",
-    swaggerUrl = "/",
+    swaggerUrl = "/swagger",
     timestamp = DateTime.UtcNow
 }));
+
+// Fallback to Angular SPA index.html for all non-API client routes
+app.MapFallbackToFile("index.html");
 
 app.Run();
