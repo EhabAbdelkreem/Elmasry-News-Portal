@@ -65,11 +65,11 @@ import {
 
             <!-- Auth Controls -->
             <div *ngIf="!authService.isAuthenticated()" class="flex items-center gap-2">
-              <a routerLink="/login" class="bg-stone-800/90 hover:bg-stone-700 text-stone-200 px-3 py-1 rounded-md text-[11px] font-bold transition-colors flex items-center gap-1.5 border border-stone-700/80">
-                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <a routerLink="/login" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-[11px] font-black transition-all flex items-center gap-1.5 shadow-sm border border-emerald-400/40 hover:scale-102">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
-                <span>تسجيل الدخول / إنشاء حساب</span>
+                <span>تسجيل الدخول</span>
               </a>
             </div>
 
@@ -81,8 +81,11 @@ import {
               <a *ngIf="authService.isSuperadmin() || authService.currentUser()?.role === 'editor' || authService.currentUser()?.role === 'journalist'" routerLink="/admin" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md text-[11px] font-black transition-colors shadow-xs">
                 لوحة التحكم
               </a>
-              <button (click)="authService.logout()" class="text-stone-400 hover:text-red-400 text-[11px] cursor-pointer">
-                خروج
+              <button (click)="authService.logout()" class="bg-rose-600/90 hover:bg-rose-700 text-white px-2.5 py-1 rounded-md text-[11px] font-black transition-all flex items-center gap-1 shadow-xs border border-rose-500/40 cursor-pointer hover:scale-102">
+                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>خروج</span>
               </button>
             </div>
           </div>

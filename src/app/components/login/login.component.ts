@@ -100,35 +100,14 @@ import { AuthService } from '../../services/auth.service';
           <button
             type="submit"
             [disabled]="isLoading"
-            class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl transition-all shadow-md text-sm cursor-pointer disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-black py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg text-sm cursor-pointer disabled:opacity-50 mt-3 flex items-center justify-center gap-2 border border-emerald-500/30"
           >
             <span *ngIf="isLoading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>{{ isLoading ? 'جاري التحقق...' : 'دخول إلى الحساب' }}</span>
+            <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            <span>{{ isLoading ? 'جاري التحقق...' : 'تسجيل الدخول' }}</span>
           </button>
-
-          <!-- Quick Access Demo Credentials -->
-          <div class="mt-6 pt-4 border-t border-stone-200">
-            <p class="text-[11px] text-stone-500 font-bold mb-2">الدخول السريع بحسابات القيادة والتحرير:</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                (click)="fillEhabAccount()"
-                class="p-2 bg-stone-50 hover:bg-red-50 border border-stone-200 hover:border-red-300 rounded-xl text-right transition-colors cursor-pointer text-xs"
-              >
-                <div class="font-bold text-stone-900 text-[11px]">م. إيهاب عبد الكريم</div>
-                <div class="text-[10px] text-amber-700">رئيس مجلس الإدارة والتحرير</div>
-              </button>
-
-              <button
-                type="button"
-                (click)="fillMagdyAccount()"
-                class="p-2 bg-stone-50 hover:bg-stone-100 border border-stone-200 hover:border-stone-400 rounded-xl text-right transition-colors cursor-pointer text-xs"
-              >
-                <div class="font-bold text-stone-900 text-[11px]">أ. مجدي محمد أبو زيد</div>
-                <div class="text-[10px] text-red-700">مدير التحرير التنفيذي</div>
-              </button>
-            </div>
-          </div>
         </form>
 
         <!-- TAB 2: REGISTER FORM -->
@@ -282,18 +261,6 @@ export class LoginComponent implements OnInit {
   clearMessages() {
     this.errorMessage = '';
     this.successMessage = '';
-  }
-
-  fillEhabAccount() {
-    this.loginEmail = 'ehababdelkreem012@yahoo.com';
-    this.loginPassword = '01282407472ehab';
-    this.errorMessage = '';
-  }
-
-  fillMagdyAccount() {
-    this.loginEmail = 'magdy@almasry-news.eg';
-    this.loginPassword = 'magdy';
-    this.errorMessage = '';
   }
 
   onLogin() {
